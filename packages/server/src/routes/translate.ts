@@ -2,12 +2,19 @@ import type { FastifyInstance } from "fastify";
 import { eq } from "drizzle-orm";
 import { worlds, states, burgs, cultures, religions } from "../db/schema.js";
 import { translateBatch, type TranslationItem } from "../services/translator.js";
+import { config } from "../config.js";
 
 export async function translateRoutes(app: FastifyInstance) {
   app.post<{ Params: { id: string } }>(
     "/worlds/:id/translate",
     async (request, reply) => {
       const worldId = request.params.id;
+
+      if (!config.anthropic.apiKey) {
+        return reply.status(503).send({
+          error: "ANTHROPIC_API_KEY не настроен. Добавьте ключ в файл .env",
+        });
+      }
 
       const [world] = await app.db
         .select()

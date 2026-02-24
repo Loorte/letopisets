@@ -96,7 +96,9 @@
     "phaseBurgs": "Города",
     "complete": "Перевод завершён",
     "error": "Ошибка перевода",
-    "original": "ориг."
+    "original": "ориг.",
+    "apiKeyRequired": "Требуется ANTHROPIC_API_KEY",
+    "apiKeyNotConfigured": "API ключ не настроен. Добавьте ANTHROPIC_API_KEY в .env файл сервера"
   },
   "common": {
     "save": "Сохранить",

@@ -42,8 +42,23 @@ pnpm db:push
 
 ```bash
 cp .env.example .env
-# Заполнить ANTHROPIC_API_KEY в .env
 ```
+
+### Настройка Claude API
+
+Для работы перевода названий и ИИ-симуляции требуется ключ Anthropic API:
+
+1. Зарегистрируйтесь на [console.anthropic.com](https://console.anthropic.com/)
+2. Создайте API ключ в разделе [API Keys](https://console.anthropic.com/settings/keys)
+3. Вставьте ключ в файл `.env`:
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-api03-...
+```
+
+4. Перезапустите сервер (`pnpm dev`)
+
+> **Примечание:** без ключа базовый функционал (импорт карт, просмотр сущностей) работает, но перевод и ИИ-агенты будут недоступны.
 
 ### Запуск в dev-режиме
 

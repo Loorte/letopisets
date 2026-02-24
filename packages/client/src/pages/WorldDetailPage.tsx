@@ -77,6 +77,14 @@ export function WorldDetailPage() {
   const [translateDone, setTranslateDone] = useState(false);
   const [translateError, setTranslateError] = useState<string | null>(null);
 
+  const { data: anthropicStatus } = useQuery<{ configured: boolean }>({
+    queryKey: ["anthropic-status"],
+    queryFn: () => apiFetch<{ configured: boolean }>("/settings/anthropic-status"),
+    staleTime: 60_000,
+  });
+
+  const apiKeyConfigured = anthropicStatus?.configured ?? true;
+
   const { data: world, isLoading } = useQuery<World>({
     queryKey: ["world", id],
     queryFn: () => apiFetch<World>(`/worlds/${id}`),
@@ -235,15 +243,29 @@ export function WorldDetailPage() {
           >
             {importMutation.isPending ? t("world.importing") : t("world.importFmg")}
           </button>
-          <button
-            onClick={handleTranslate}
-            disabled={translating}
-            className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white transition-colors hover:bg-indigo-500 disabled:opacity-50"
-          >
-            {translating ? t("translate.translating") : t("translate.button")}
-          </button>
+          <div className="relative group">
+            <button
+              onClick={handleTranslate}
+              disabled={translating || !apiKeyConfigured}
+              className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white transition-colors hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {translating ? t("translate.translating") : t("translate.button")}
+            </button>
+            {!apiKeyConfigured && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-64 rounded-lg bg-yellow-900/90 border border-yellow-700 px-3 py-2 text-xs text-yellow-200 text-center">
+                {t("translate.apiKeyNotConfigured")}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* API key warning */}
+      {!apiKeyConfigured && (
+        <div className="mb-4 rounded-lg border border-yellow-800 bg-yellow-900/30 p-3 text-sm text-yellow-300">
+          {t("translate.apiKeyNotConfigured")}
+        </div>
+      )}
 
       {/* Translation progress */}
       {translating && translateProgress && (
