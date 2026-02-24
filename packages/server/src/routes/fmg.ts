@@ -20,10 +20,27 @@ export async function fmgRoutes(app: FastifyInstance) {
         return reply.status(404).send({ error: "Мир не найден" });
       }
 
-      const fmgData = request.body as FmgMapData;
-      if (!fmgData || !fmgData.states || !fmgData.burgs) {
+      // FMG exports nest entities under `pack`
+      const raw = request.body as Record<string, unknown>;
+      const pack = (raw.pack ?? raw) as Record<string, unknown>;
+      const info = raw.info as FmgMapData["info"] | undefined;
+
+      if (!pack || !pack.states || !pack.burgs) {
         return reply.status(400).send({ error: "Некорректный формат FMG JSON" });
       }
+
+      const fmgData: FmgMapData = {
+        info: info ?? ({} as FmgMapData["info"]),
+        settings: (raw.settings ?? {}) as FmgMapData["settings"],
+        cells: (pack.cells ? { cells: [], features: [], biomes: [] } : { cells: [], features: [], biomes: [] }) as FmgMapData["cells"],
+        states: pack.states as FmgMapData["states"],
+        burgs: pack.burgs as FmgMapData["burgs"],
+        cultures: (pack.cultures ?? []) as FmgMapData["cultures"],
+        religions: (pack.religions ?? []) as FmgMapData["religions"],
+        rivers: (pack.rivers ?? []) as FmgMapData["rivers"],
+        markers: (pack.markers ?? []) as FmgMapData["markers"],
+        notes: (raw.notes ?? []) as FmgMapData["notes"],
+      };
 
       const parsed = parseFmgData(fmgData);
 
@@ -81,11 +98,11 @@ export async function fmgRoutes(app: FastifyInstance) {
           .returning({ id: burgs.id, fmgId: burgs.fmgId });
       }
 
-      // Store raw FMG data on world
+      // Store FMG info on world (not the full JSON — too large)
       await app.db
         .update(worlds)
         .set({
-          fmgData: fmgData,
+          fmgData: { info: fmgData.info, settings: fmgData.settings },
           seed: fmgData.info?.seed ?? world.seed,
           updatedAt: new Date(),
         })

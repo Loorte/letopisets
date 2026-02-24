@@ -55,11 +55,16 @@ export interface ParsedFmgData {
   religions: Omit<InsertReligion, "worldId">[];
 }
 
+// FMG arrays use index 0 as a placeholder (can be `0`, `null`, or an empty object)
+function isValidEntry<T extends { i: number }>(entry: unknown): entry is T {
+  return typeof entry === "object" && entry !== null && "i" in entry && (entry as T).i > 0;
+}
+
 export function parseFmgData(data: FmgMapData): ParsedFmgData {
-  const validStates = data.states.filter((s: FmgState) => s.i !== 0);
-  const validBurgs = data.burgs.filter((b: FmgBurg) => b.i !== 0);
-  const validCultures = data.cultures.filter((c: FmgCulture) => c.i !== 0);
-  const validReligions = data.religions.filter((r: FmgReligion) => r.i !== 0);
+  const validStates = data.states.filter(isValidEntry<FmgState>);
+  const validBurgs = data.burgs.filter(isValidEntry<FmgBurg>);
+  const validCultures = data.cultures.filter(isValidEntry<FmgCulture>);
+  const validReligions = data.religions.filter(isValidEntry<FmgReligion>);
 
   // Build fmgId → state index map for burg references (resolved later with real UUIDs)
   const parsedStates = validStates.map((s: FmgState) => {
