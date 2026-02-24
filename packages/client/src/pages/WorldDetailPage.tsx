@@ -135,7 +135,6 @@ export function WorldDetailPage() {
     try {
       const response = await fetch(`/api/worlds/${id}/translate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
       });
 
       if (!response.ok || !response.body) {
