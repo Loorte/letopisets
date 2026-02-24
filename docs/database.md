@@ -68,7 +68,8 @@ worlds ─────┬──── states ──────┬──── b
 | `id` | UUID PK | |
 | `world_id` | UUID FK → worlds | Каскадное удаление |
 | `fmg_id` | integer | Индекс в массиве states FMG |
-| `name` | text | Название государства |
+| `name` | text | Название государства (после перевода — русское) |
+| `name_original` | text | Оригинальное название из FMG (до перевода) |
 | `form` | government_form | Форма правления |
 | `color` | text | Цвет на карте (hex) |
 | `population` | integer | Численность населения |
@@ -89,7 +90,8 @@ worlds ─────┬──── states ──────┬──── b
 | `world_id` | UUID FK → worlds | Каскадное удаление |
 | `state_id` | UUID FK → states | Государство-владелец |
 | `fmg_id` | integer | Индекс в массиве burgs FMG |
-| `name` | text | Название города |
+| `name` | text | Название города (после перевода — русское) |
+| `name_original` | text | Оригинальное название из FMG (до перевода) |
 | `population` | integer | Население |
 | `is_capital` | boolean | Столица государства |
 | `is_port` | boolean | Портовый город |
@@ -108,7 +110,8 @@ worlds ─────┬──── states ──────┬──── b
 | `id` | UUID PK | |
 | `world_id` | UUID FK → worlds | |
 | `fmg_id` | integer | Индекс в массиве cultures FMG |
-| `name` | text | Название культуры |
+| `name` | text | Название культуры (после перевода — русское) |
+| `name_original` | text | Оригинальное название из FMG (до перевода) |
 | `type` | culture_type | Тип: nomadic, river, lake, naval и др. |
 | `color` | text | Цвет на карте |
 | `traits` | JSONB | ИИ-сгенерированные культурные черты |
@@ -124,9 +127,11 @@ worlds ─────┬──── states ──────┬──── b
 | `id` | UUID PK | |
 | `world_id` | UUID FK → worlds | |
 | `fmg_id` | integer | Индекс в массиве religions FMG |
-| `name` | text | Название религии |
+| `name` | text | Название религии (после перевода — русское) |
+| `name_original` | text | Оригинальное название из FMG (до перевода) |
 | `type` | religion_type | Тип: folk, organized, cult, heresy |
-| `deity` | text | Божество |
+| `deity` | text | Божество (после перевода — русское) |
+| `deity_original` | text | Оригинальное имя божества из FMG (до перевода) |
 | `color` | text | Цвет на карте |
 | `tenets` | JSONB | ИИ-сгенерированные заповеди и догматы |
 | `created_at` | timestamptz | |

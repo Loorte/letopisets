@@ -6,6 +6,7 @@ export const burgSchema = z.object({
   stateId: z.string().uuid().optional(),
   fmgId: z.number().int(),
   name: z.string().min(1),
+  nameOriginal: z.string().nullable().optional(),
   population: z.number().int().nonnegative().default(0),
   isCapital: z.boolean().default(false),
   isPort: z.boolean().default(false),

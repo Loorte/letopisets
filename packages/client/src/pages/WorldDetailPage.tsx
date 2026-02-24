@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -11,6 +11,7 @@ interface EntityState {
   id: string;
   fmgId: number;
   name: string;
+  nameOriginal: string | null;
   form: string;
   color: string | null;
   population: number;
@@ -23,6 +24,7 @@ interface EntityBurg {
   id: string;
   fmgId: number;
   name: string;
+  nameOriginal: string | null;
   population: number;
   isCapital: boolean;
   isPort: boolean;
@@ -34,6 +36,7 @@ interface EntityCulture {
   id: string;
   fmgId: number;
   name: string;
+  nameOriginal: string | null;
   type: string;
   color: string | null;
 }
@@ -42,10 +45,25 @@ interface EntityReligion {
   id: string;
   fmgId: number;
   name: string;
+  nameOriginal: string | null;
   type: string;
   deity: string | null;
+  deityOriginal: string | null;
   color: string | null;
 }
+
+interface TranslateProgress {
+  phase: string;
+  translated: number;
+  totalItems: number;
+}
+
+const PHASE_LABELS: Record<string, string> = {
+  states: "translate.phaseStates",
+  cultures: "translate.phaseCultures",
+  religions: "translate.phaseReligions",
+  burgs: "translate.phaseBurgs",
+};
 
 export function WorldDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -53,6 +71,11 @@ export function WorldDetailPage() {
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [tab, setTab] = useState<Tab>("overview");
+
+  const [translating, setTranslating] = useState(false);
+  const [translateProgress, setTranslateProgress] = useState<TranslateProgress | null>(null);
+  const [translateDone, setTranslateDone] = useState(false);
+  const [translateError, setTranslateError] = useState<string | null>(null);
 
   const { data: world, isLoading } = useQuery<World>({
     queryKey: ["world", id],
@@ -103,6 +126,64 @@ export function WorldDetailPage() {
     if (fileRef.current) fileRef.current.value = "";
   };
 
+  const handleTranslate = useCallback(async () => {
+    setTranslating(true);
+    setTranslateDone(false);
+    setTranslateError(null);
+    setTranslateProgress(null);
+
+    try {
+      const response = await fetch(`/api/worlds/${id}/translate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        let currentEvent = "";
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            currentEvent = line.slice(7);
+          } else if (line.startsWith("data: ")) {
+            const data = JSON.parse(line.slice(6));
+            if (currentEvent === "progress") {
+              setTranslateProgress({
+                phase: data.phase,
+                translated: data.translated,
+                totalItems: data.totalItems,
+              });
+            } else if (currentEvent === "complete") {
+              setTranslateDone(true);
+            } else if (currentEvent === "error") {
+              setTranslateError(data.message);
+            }
+          }
+        }
+      }
+
+      // Invalidate all entity queries to reload translated names
+      queryClient.invalidateQueries({ queryKey: ["world", id] });
+    } catch (err) {
+      setTranslateError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setTranslating(false);
+    }
+  }, [id, queryClient]);
+
   if (isLoading) {
     return <div className="text-center text-stone-500">{t("common.loading")}</div>;
   }
@@ -120,6 +201,11 @@ export function WorldDetailPage() {
     { key: "map", label: t("world.map") },
   ];
 
+  const progressPercent =
+    translateProgress && translateProgress.totalItems > 0
+      ? Math.round((translateProgress.translated / translateProgress.totalItems) * 100)
+      : 0;
+
   return (
     <div>
       {/* Header */}
@@ -135,7 +221,7 @@ export function WorldDetailPage() {
             {world.seed && <span>{t("world.seed")}: {world.seed}</span>}
           </div>
         </div>
-        <div>
+        <div className="flex gap-2">
           <input
             ref={fileRef}
             type="file"
@@ -150,8 +236,44 @@ export function WorldDetailPage() {
           >
             {importMutation.isPending ? t("world.importing") : t("world.importFmg")}
           </button>
+          <button
+            onClick={handleTranslate}
+            disabled={translating}
+            className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white transition-colors hover:bg-indigo-500 disabled:opacity-50"
+          >
+            {translating ? t("translate.translating") : t("translate.button")}
+          </button>
         </div>
       </div>
+
+      {/* Translation progress */}
+      {translating && translateProgress && (
+        <div className="mb-4 rounded-lg border border-indigo-800 bg-indigo-900/30 p-3">
+          <div className="mb-2 flex items-center justify-between text-sm text-indigo-300">
+            <span>
+              {translateProgress.phase && t(PHASE_LABELS[translateProgress.phase] ?? translateProgress.phase)}
+            </span>
+            <span>{t("translate.progress", { translated: translateProgress.translated, total: translateProgress.totalItems })}</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-indigo-900">
+            <div
+              className="h-full rounded-full bg-indigo-400 transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {translateDone && (
+        <div className="mb-4 rounded-lg border border-green-800 bg-green-900/30 p-3 text-sm text-green-300">
+          {t("translate.complete")}
+        </div>
+      )}
+      {translateError && (
+        <div className="mb-4 rounded-lg border border-red-800 bg-red-900/30 p-3 text-sm text-red-300">
+          {t("translate.error")}: {translateError}
+        </div>
+      )}
 
       {importMutation.isSuccess && (
         <div className="mb-4 rounded-lg border border-green-800 bg-green-900/30 p-3 text-sm text-green-300">
@@ -201,7 +323,12 @@ export function WorldDetailPage() {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-type TFn = (key: string) => string;
+type TFn = (key: string, opts?: Record<string, unknown>) => string;
+
+function OriginalName({ original }: { original: string | null }) {
+  if (!original) return null;
+  return <span className="ml-1 text-stone-500">({original})</span>;
+}
 
 function OverviewTab({ states, burgs, cultures, religions, t }: {
   states: EntityState[];
@@ -263,7 +390,10 @@ function StatesTab({ data, isLoading, t }: { data: EntityState[]; isLoading: boo
               <td className="px-3 py-2">
                 {s.color && <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: s.color }} />}
               </td>
-              <td className="px-3 py-2 font-medium text-stone-100">{s.name}</td>
+              <td className="px-3 py-2 font-medium text-stone-100">
+                {s.name}
+                <OriginalName original={s.nameOriginal} />
+              </td>
               <td className="px-3 py-2 text-stone-400">{s.form}</td>
               <td className="px-3 py-2 text-stone-300">{s.population.toLocaleString()}</td>
               <td className="px-3 py-2 text-stone-300">{s.military}</td>
@@ -295,7 +425,10 @@ function BurgsTab({ data, isLoading, t }: { data: EntityBurg[]; isLoading: boole
         <tbody>
           {data.map((b) => (
             <tr key={b.id} className="border-b border-stone-800/50 hover:bg-stone-900">
-              <td className="px-3 py-2 font-medium text-stone-100">{b.name}</td>
+              <td className="px-3 py-2 font-medium text-stone-100">
+                {b.name}
+                <OriginalName original={b.nameOriginal} />
+              </td>
               <td className="px-3 py-2 text-stone-300">{b.population.toLocaleString()}</td>
               <td className="px-3 py-2 text-stone-300">{b.isCapital ? "+" : ""}</td>
               <td className="px-3 py-2 text-stone-300">{b.isPort ? "+" : ""}</td>
@@ -327,7 +460,10 @@ function CulturesTab({ data, isLoading, t }: { data: EntityCulture[]; isLoading:
               <td className="px-3 py-2">
                 {c.color && <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: c.color }} />}
               </td>
-              <td className="px-3 py-2 font-medium text-stone-100">{c.name}</td>
+              <td className="px-3 py-2 font-medium text-stone-100">
+                {c.name}
+                <OriginalName original={c.nameOriginal} />
+              </td>
               <td className="px-3 py-2 text-stone-400">{c.type}</td>
             </tr>
           ))}
@@ -358,9 +494,15 @@ function ReligionsTab({ data, isLoading, t }: { data: EntityReligion[]; isLoadin
               <td className="px-3 py-2">
                 {r.color && <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: r.color }} />}
               </td>
-              <td className="px-3 py-2 font-medium text-stone-100">{r.name}</td>
+              <td className="px-3 py-2 font-medium text-stone-100">
+                {r.name}
+                <OriginalName original={r.nameOriginal} />
+              </td>
               <td className="px-3 py-2 text-stone-400">{r.type}</td>
-              <td className="px-3 py-2 text-stone-300">{r.deity ?? "—"}</td>
+              <td className="px-3 py-2 text-stone-300">
+                {r.deity ?? "—"}
+                {r.deityOriginal && <span className="ml-1 text-stone-500">({r.deityOriginal})</span>}
+              </td>
             </tr>
           ))}
         </tbody>

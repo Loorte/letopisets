@@ -54,6 +54,7 @@ Fastify 5 сервер на TypeScript.
 - **БД**: PostgreSQL 16 через Drizzle ORM (`src/db/schema.ts`)
 - **Очередь задач**: BullMQ + Redis для тиков симуляции
 - **ИИ-агенты**: Claude API через @anthropic-ai/sdk (`src/agents/`)
+- **Перевод названий**: Claude Haiku для перевода FMG-названий на русский (`src/services/translator.ts`)
 
 ### Shared (`packages/shared`)
 
@@ -118,7 +119,7 @@ packages/
 └── server/
     └── src/
         ├── routes/           # Fastify-плагины маршрутов
-        ├── services/         # Бизнес-логика
+        ├── services/         # Бизнес-логика (anthropic.ts, translator.ts, fmg-parser.ts)
         ├── simulation/       # Тиковый цикл, состояние мира
         ├── agents/           # Оркестратор, промпты, инструменты, память
         ├── db/               # Drizzle-схема и миграции

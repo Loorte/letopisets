@@ -14,6 +14,7 @@ export const stateSchema = z.object({
   worldId: z.string().uuid(),
   fmgId: z.number().int(),
   name: z.string().min(1),
+  nameOriginal: z.string().nullable().optional(),
   form: governmentFormEnum,
   color: z.string().optional(),
   population: z.number().int().nonnegative().default(0),

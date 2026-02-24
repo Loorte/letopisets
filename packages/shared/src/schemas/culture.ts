@@ -15,6 +15,7 @@ export const cultureSchema = z.object({
   worldId: z.string().uuid(),
   fmgId: z.number().int(),
   name: z.string().min(1),
+  nameOriginal: z.string().nullable().optional(),
   type: cultureTypeEnum,
   color: z.string().optional(),
   traits: z.record(z.unknown()).optional(),
