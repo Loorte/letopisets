@@ -1,0 +1,18 @@
+{
+  "name": "letopisets",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "db:generate": "pnpm --filter @letopisets/server db:generate",
+    "db:migrate": "pnpm --filter @letopisets/server db:migrate",
+    "db:push": "pnpm --filter @letopisets/server db:push"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.0"
+  }
+}

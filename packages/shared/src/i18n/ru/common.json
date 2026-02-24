@@ -1,0 +1,83 @@
+{
+  "app": {
+    "title": "Летописец",
+    "subtitle": "Симулятор фэнтезийного мира"
+  },
+  "nav": {
+    "home": "Главная",
+    "worlds": "Миры",
+    "simulation": "Симуляция",
+    "agents": "Агенты",
+    "settings": "Настройки"
+  },
+  "world": {
+    "create": "Создать мир",
+    "delete": "Удалить мир",
+    "import": "Импортировать карту",
+    "export": "Экспортировать",
+    "name": "Название мира",
+    "seed": "Сид генерации",
+    "status": "Статус",
+    "tick": "Тик",
+    "idle": "Ожидание",
+    "running": "Запущена",
+    "paused": "Пауза"
+  },
+  "entity": {
+    "states": "Государства",
+    "burgs": "Города",
+    "cultures": "Культуры",
+    "religions": "Религии",
+    "npcs": "Персонажи",
+    "creatures": "Существа",
+    "events": "События"
+  },
+  "simulation": {
+    "start": "Запустить",
+    "pause": "Пауза",
+    "step": "Шаг",
+    "stop": "Остановить",
+    "speed": "Скорость",
+    "timeline": "Хронология"
+  },
+  "creature": {
+    "species": "Вид",
+    "category": {
+      "solo": "Одиночка",
+      "pack": "Стая",
+      "swarm": "Орда"
+    },
+    "threatLevel": {
+      "harmless": "Безвредный",
+      "nuisance": "Помеха",
+      "dangerous": "Опасный",
+      "deadly": "Смертельный",
+      "legendary": "Легендарный"
+    },
+    "behavior": {
+      "territorial": "Территориальный",
+      "nomadic": "Кочевой",
+      "predatory": "Хищный",
+      "passive": "Мирный",
+      "intelligent": "Разумный"
+    },
+    "status": {
+      "alive": "Жив",
+      "dead": "Мёртв",
+      "dormant": "Спит",
+      "banished": "Изгнан"
+    }
+  },
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "confirm": "Подтвердить",
+    "search": "Поиск",
+    "noData": "Нет данных"
+  }
+}

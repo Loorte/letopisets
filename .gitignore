@@ -1,0 +1,27 @@
+node_modules/
+dist/
+.turbo/
+*.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+.obsidian/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Docker volumes
+docker/data/
