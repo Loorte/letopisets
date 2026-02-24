@@ -6,3 +6,4 @@ export * from "./religion.js";
 export * from "./npc.js";
 export * from "./creature.js";
 export * from "./event.js";
+export * from "./simulation.js";

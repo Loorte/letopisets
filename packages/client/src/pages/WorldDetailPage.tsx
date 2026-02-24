@@ -3,9 +3,12 @@ import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api";
+import { useSimulation } from "../hooks/useSimulation";
+import { SimulationControls } from "../components/SimulationControls";
+import { Timeline } from "../components/Timeline";
 import type { World } from "@letopisets/shared/schemas/world";
 
-type Tab = "overview" | "states" | "burgs" | "cultures" | "religions" | "map";
+type Tab = "overview" | "states" | "burgs" | "cultures" | "religions" | "map" | "timeline";
 
 interface EntityState {
   id: string;
@@ -71,6 +74,8 @@ export function WorldDetailPage() {
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [tab, setTab] = useState<Tab>("overview");
+
+  const sim = useSimulation(id);
 
   const [translating, setTranslating] = useState(false);
   const [translateProgress, setTranslateProgress] = useState<TranslateProgress | null>(null);
@@ -206,6 +211,7 @@ export function WorldDetailPage() {
     { key: "cultures", label: t("entity.cultures") },
     { key: "religions", label: t("entity.religions") },
     { key: "map", label: t("world.map") },
+    { key: "timeline", label: t("simulation.timeline") },
   ];
 
   const progressPercent =
@@ -258,6 +264,23 @@ export function WorldDetailPage() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Simulation controls */}
+      <div className="mb-4">
+        <SimulationControls
+          status={sim.status}
+          speed={sim.speed}
+          currentTick={sim.currentTick}
+          processingTick={sim.processingTick}
+          lastTickResult={sim.lastTickResult}
+          apiKeyConfigured={apiKeyConfigured}
+          onStart={sim.start}
+          onPause={sim.pause}
+          onStep={sim.step}
+          onStop={sim.stop}
+          onSpeedChange={sim.setSpeed}
+        />
       </div>
 
       {/* API key warning */}
@@ -339,6 +362,9 @@ export function WorldDetailPage() {
       {tab === "cultures" && <CulturesTab data={culturesQuery.data ?? []} isLoading={culturesQuery.isLoading} t={t} />}
       {tab === "religions" && <ReligionsTab data={religionsQuery.data ?? []} isLoading={religionsQuery.isLoading} t={t} />}
       {tab === "map" && <MapTab burgs={burgsQuery.data ?? []} states={statesQuery.data ?? []} t={t} />}
+      {tab === "timeline" && (
+        <Timeline events={sim.events} onLoadMore={sim.loadMoreEvents} />
+      )}
     </div>
   );
 }

@@ -8,8 +8,10 @@ import { fmgRoutes } from "./routes/fmg.js";
 import { entityRoutes } from "./routes/entities.js";
 import { translateRoutes } from "./routes/translate.js";
 import { settingsRoutes } from "./routes/settings.js";
+import { simulationRoutes } from "./routes/simulation.js";
 import { dbPlugin } from "./plugins/db.js";
 import { redisPlugin } from "./plugins/redis.js";
+import { simulationPlugin } from "./plugins/simulation.js";
 import { wsHandler } from "./ws/handler.js";
 
 export async function buildApp() {
@@ -25,6 +27,7 @@ export async function buildApp() {
 
   await app.register(dbPlugin);
   await app.register(redisPlugin);
+  await app.register(simulationPlugin);
 
   await app.register(healthRoutes);
   await app.register(worldRoutes);
@@ -32,6 +35,7 @@ export async function buildApp() {
   await app.register(entityRoutes);
   await app.register(translateRoutes);
   await app.register(settingsRoutes);
+  await app.register(simulationRoutes);
   await app.register(wsHandler);
 
   return app;

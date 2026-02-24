@@ -56,7 +56,33 @@
     "step": "Шаг",
     "stop": "Остановить",
     "speed": "Скорость",
-    "timeline": "Хронология"
+    "speedSlow": "Медленная",
+    "speedNormal": "Обычная",
+    "speedFast": "Быстрая",
+    "timeline": "Хронология",
+    "tickProcessing": "Обработка тика {{tick}}...",
+    "tickComplete": "Тик {{tick}} завершён",
+    "agentsRun": "Агентов: {{count}}",
+    "eventsCreated": "Событий: {{count}}",
+    "tokensUsed": "Токенов: {{count}}",
+    "noEvents": "Событий пока нет",
+    "loadMore": "Загрузить ещё",
+    "apiKeyRequired": "Требуется ANTHROPIC_API_KEY"
+  },
+  "severity": {
+    "minor": "Незначительное",
+    "moderate": "Умеренное",
+    "major": "Серьёзное",
+    "catastrophic": "Катастрофическое"
+  },
+  "eventType": {
+    "political": "Политическое",
+    "economic": "Экономическое",
+    "military": "Военное",
+    "social": "Социальное",
+    "natural": "Природное",
+    "magical": "Магическое",
+    "creature": "Существа"
   },
   "creature": {
     "species": "Вид",
